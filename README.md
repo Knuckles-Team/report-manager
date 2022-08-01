@@ -13,7 +13,7 @@ Manage your reports
 
 ### Example:
 ```bash
-report-manager --file English.srt --mode + --time 5
+report-manager 
 ```
 
 

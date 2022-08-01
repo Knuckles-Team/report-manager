@@ -1,1 +1,6 @@
-chardet
+sklearn
+pandas
+matplotlib
+pandas_profiling
+scipy
+numpy

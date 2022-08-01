@@ -27,7 +27,7 @@ setup(
     license='Unlicense',
     packages=['report_manager'],
     include_package_data=True,
-    install_requires=['chardet'],
+    install_requires=['sklearn', 'pandas', 'matplotlib', 'pandas_profiling', 'scipy', 'numpy'],
     py_modules=['report_manager'],
     package_data={'report_manager': ['report_manager']},
     classifiers=[

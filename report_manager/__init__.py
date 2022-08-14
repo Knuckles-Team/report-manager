@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 from report_manager.version import __version__, __author__, __credits__
-from report_manager.report_manager import ReportManager, main
+from report_manager.report_manager import ReportManager
 """
 Report Manager
 

@@ -231,9 +231,7 @@ class ReportManager:
                     print("One of your keys was empty")
             except Exception as e:
                 print("Error: ", e)
-
-            #pd.merge(df_ci, df_sales_mobile, left_on=['Agent - HR Number', 'Customer - Account Number', 'MA'], right_on=['Agent - HR Number', 'Customer - Account Number', 'MA'], how='left')
-            print(self.df_final)
+        print(self.df_final)
 
     def set_csv_path(self, new_csv_path):
         self.csv_path = new_csv_path

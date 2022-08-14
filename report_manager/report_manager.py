@@ -24,33 +24,50 @@ from sklearn.preprocessing import LabelEncoder
 import matplotlib.pyplot as plt
 
 
-
-# The Report Merge class takes two different files (CSV, or Excel) and Joins or appends.
 class ReportManager:
-    log = None
-    file_1 = None
-    file_2 = None
-    df_1 = None
-    df_2 = None
-    df_1_join_keys = None
-    df_2_join_keys = None
-    join_type = "inner"
-    report_name = "joined_report_export"
-    report_name_csv = str(report_name)+".csv"
-    report_name_xlsx = str(report_name)+".xlsx"
-    save_directory = os.getcwd()
-    csv_export = save_directory + '\\' + report_name_csv
-    excel_export = save_directory + '\\' + report_name_xlsx
-    df_final = None
-
-    # Initialize the Class
     def __init__(self, logger=None):
-        if logger:
-            self.log = logger
-        else:
-            self.log = None  # Replace with log call in logger class
-        self.log.info("Initializing Web Archive Complete!")
-        print("Initializing & Loading Files")
+        self.log = None
+
+        # Report Merger
+        self.file_1 = None
+        self.file_2 = None
+        self.df_1 = None
+        self.df_2 = None
+        self.df_1_join_keys = None
+        self.df_2_join_keys = None
+        self.join_type = "inner"
+        self.report_name = "joined_report_export"
+        self.report_name_csv = str(report_name) + ".csv"
+        self.report_name_xlsx = str(report_name) + ".xlsx"
+        self.save_directory = os.getcwd()
+        self.csv_export = save_directory + '\\' + report_name_csv
+        self.excel_export = save_directory + '\\' + report_name_xlsx
+        self.df_final = None
+
+        # Pandas Profiling
+        self.file_raw = None
+        self.df_raw = None
+        self.report_name = "pandas-profiling_export"
+        self.report_title = "Title"
+        self.report_name_html = str(report_name) + ".html"
+        self.save_directory = os.getcwd()
+        self.export = save_directory + '\\' + report_name
+        self.profile = None
+
+        # Custom Report
+        self.csv_path = os.getcwd()
+        self.plot_path = os.getcwd()
+        self.report_path = os.getcwd()
+        self.clean_csv_path = os.getcwd()
+        self.data = None
+        self.nan_prop = None
+        self.categorical_variable = None
+        self.numerical_variable = None
+
+        # Plot
+        self.num_var_combination = None
+        self.cat_var_combination = None
+        self.catnum_combination = None
 
     def set_file_1(self, file_1):
         self.file_1 = file_1
@@ -71,6 +88,9 @@ class ReportManager:
             self.report_name = report_name
             self.csv_export = self.save_directory + '\\' + str(self.report_name)+".csv"
             self.excel_export = self.save_directory + '\\' + str(self.report_name)+".xlsx"
+            self.report_name = new_report_name
+            self.report_name_html = str(new_report_name) + ".html"
+            self.export = self.save_directory + '\\' + str(self.report_name) + ".html"
         else:
             print("Report Name was Blank")
 
@@ -82,6 +102,16 @@ class ReportManager:
         print("New Directory: ",  self.save_directory)
         self.csv_export = self.save_directory + '\\' + self.report_name_csv
         self.excel_export = self.save_directory + '\\' + self.report_name_xlsx
+        self.set_pandas_save_directory(directory)
+        self.set_csv_path(directory)
+        self.set_plot_path(directory)
+        self.set_report_path(directory)
+        self.set_clean_csv_path(directory)
+
+    def set_pandas_save_directory(self, save_path):
+        self.save_directory = save_path
+        print("New Directory: ", self.save_directory)
+        self.export = self.save_directory + '\\' + self.report_name_html
 
     # Load Files to Dataframe 1
     def load_dataframe_1(self):
@@ -205,64 +235,6 @@ class ReportManager:
             #pd.merge(df_ci, df_sales_mobile, left_on=['Agent - HR Number', 'Customer - Account Number', 'MA'], right_on=['Agent - HR Number', 'Customer - Account Number', 'MA'], how='left')
             print(self.df_final)
 
-    def export_data(self, csv_flag):
-        print("Exporting Data")
-        if csv_flag == 1:
-            self.df_final.to_csv(self.csv_export, index=False)
-            print("Exported to CSV Complete!")
-        else:
-            # Export large data by creating xlsxwriter first and setting archivezip64 option
-            self.df_final.to_excel(self.excel_export, index=False, engine='xlsxwriter')
-            print("Exported to Excel Complete!")
-
-
-class ReportAnalyzer:
-    log = None
-
-    # Pandas Profiling
-    file_raw = None
-    df_raw = None
-    report_name = "pandas-profiling_export"
-    report_title = "Title"
-    report_name_html = str(report_name) + ".html"
-    save_directory = os.getcwd()
-    export = save_directory + '\\' + report_name
-    profile = None
-
-    # Custom Report
-    csv_path = os.getcwd()
-    plot_path = os.getcwd()
-    report_path = os.getcwd()
-    clean_csv_path = os.getcwd()
-    data = None
-    nan_prop = None
-    categorical_variable = None
-    numerical_variable = None
-    model = None
-    plot = None
-
-    def __init__(self, logger=None):
-        print("Init")
-        if logger:
-            self.log = logger
-        else:
-            self.log = None  # Replace with log call in logger class
-        self.log.info("Initializing Web Archive Complete!")
-        self.plot = AnalyticalPlot()
-        self.model = AnalyticalModel()
-
-    def set_save_directory(self, directory):
-        self.set_pandas_save_directory(directory)
-        self.set_csv_path(directory)
-        self.set_plot_path(directory)
-        self.set_report_path(directory)
-        self.set_clean_csv_path(directory)
-
-    def set_pandas_save_directory(self, save_path):
-        self.save_directory = save_path
-        print("New Directory: ", self.save_directory)
-        self.export = self.save_directory + '\\' + self.report_name_html
-
     def set_csv_path(self, new_csv_path):
         self.csv_path = new_csv_path
 
@@ -300,7 +272,7 @@ class ReportAnalyzer:
             print("Opening Report Complete")
 
             # Execute overview function in model module
-            self.data = self.model.overview(self.data, self.numerical_variable, report)
+            self.data = self.model_overview(self.data, self.numerical_variable, report)
 
             # Create a function to decide whether to drop all NA values or replace them
             # Drop it if NAN count < 5 %
@@ -351,7 +323,7 @@ class ReportAnalyzer:
 
             print("Running Model")
             # Running the report now
-            self.model.run(num_var_combination, catnum_combination, cat_var_combination, report, self.data)
+            self.model_run(num_var_combination, catnum_combination, cat_var_combination, report, self.data)
             # Create an output file that shows cleaned data
             data2 = self.data.copy()
             data2.to_csv(r'{}/cleaned_csv.csv'.format(self.clean_csv_path), index=False)
@@ -401,19 +373,6 @@ class ReportAnalyzer:
     def set_file(self, file_raw):
         self.file_raw = file_raw
 
-    # Pandas Profiling Set Report Name
-    def set_report_name(self, new_report_name):
-        if new_report_name != "":
-            print("Report Name: ", new_report_name)
-            self.report_name = new_report_name
-            self.report_name_html = str(new_report_name) + ".html"
-            self.export = self.save_directory + '\\' + str(self.report_name) + ".html"
-        else:
-            print("Report Name was Blank")
-
-    def get_report_name(self):
-        return self.report_name
-
     def set_report_title(self, new_report_title):
         self.report_title = new_report_title
 
@@ -450,14 +409,7 @@ class ReportAnalyzer:
         print("Exporting Data")
         self.profile.to_file(output_file=self.export)
 
-
-class AnalyticalModel:
-
-    def __init__(self):
-        print("Init")
-
-    @staticmethod
-    def overview(df, numerical_variable, report):
+    def model_overview(self, df, numerical_variable, report):
         data_head = df.head()
         data_shape = df.shape
         data_type = df.dtypes
@@ -476,8 +428,7 @@ class AnalyticalModel:
         return df
 
     # Creating report for correlation
-    @staticmethod
-    def run(num_var_combination, catnum_combination, cat_var_combination, report, data):
+    def model_run(self, num_var_combination, catnum_combination, cat_var_combination, report, data):
         # Pearson correlation (Numerical)
         report.write("\n\n\n__________Correlation Summary (Pearson)__________")
         for i in num_var_combination:
@@ -496,8 +447,8 @@ class AnalyticalModel:
             spearsman_data = stats.spearmanr(data[var1], data[var2])
             spearsman_r2, spearsman_pvalue = ((spearsman_data[0] ** 2), spearsman_data[1])
             report.write(
-                    "\n\nThe Spearsman R_Square and Spearsman P-values between {} and {} are {} and {} respectively."
-                    .format(var1, var2, spearsman_r2, spearsman_pvalue))
+                "\n\nThe Spearsman R_Square and Spearsman P-values between {} and {} are {} and {} respectively."
+                .format(var1, var2, spearsman_r2, spearsman_pvalue))
 
         # For numeric-categorical variables
         # ONE WAY ANOVA (Cat-num variables)
@@ -524,17 +475,8 @@ class AnalyticalModel:
 
         report.close()
 
-
-class AnalyticalPlot:
-    num_var_combination = None
-    cat_var_combination = None
-    catnum_combination = None
-
-    def __init__(self):
-        print("Init")
-
-    def run(self, data, categorical_variable, numerical_variable, num_var_combination, cat_var_combination,
-            catnum_combination, plot_save_path):
+    def plot_run(self, data, categorical_variable, numerical_variable, num_var_combination, cat_var_combination,
+                 catnum_combination, plot_save_path):
         self.num_var_combination = num_var_combination
         self.cat_var_combination = cat_var_combination
         self.catnum_combination = catnum_combination
@@ -588,6 +530,16 @@ class AnalyticalPlot:
         fig4.savefig(plot_save_path + "/heatplot.png")
         fig4.clf()
 
+    def export_data(self, csv_flag):
+        print("Exporting Data")
+        if csv_flag == 1:
+            self.df_final.to_csv(self.csv_export, index=False)
+            print("Exported to CSV Complete!")
+        else:
+            # Export large data by creating xlsxwriter first and setting archivezip64 option
+            self.df_final.to_excel(self.excel_export, index=False, engine='xlsxwriter')
+            print("Exported to Excel Complete!")
+
 
 def usage():
     print(f"Usage: \n"
@@ -599,7 +551,7 @@ def usage():
           f"subshift --file Engrish.srt --mode + --time 5\n")
 
 
-def report_merger(argv):
+def report_manager(argv):
     file = ""
     mode = "+"
     time = 5
@@ -629,14 +581,14 @@ def main():
     if len(sys.argv) < 2:
         usage()
         sys.exit(2)
-    report_merger(sys.argv[1:])
+    report_manager(sys.argv[1:])
 
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
         usage()
         sys.exit(2)
-    report_merger(sys.argv[1:])
+    report_manager(sys.argv[1:])
 
     # Create Object
     test = ReportAnalyzer()

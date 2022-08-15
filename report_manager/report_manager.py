@@ -545,7 +545,7 @@ def usage():
           f"-m | --mode [ \"+\"/\"-\" ]\n"
           f"-t | --time [ Time in seconds to shift ]\n"
           f"\n"
-          f"subshift --file Engrish.srt --mode + --time 5\n")
+          f"report-manager --file Engrish.srt --mode + --time 5\n")
 
 
 def report_manager(argv):

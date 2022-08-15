@@ -25,8 +25,7 @@ import matplotlib.pyplot as plt
 
 
 class ReportManager:
-    def __init__(self, logger=None):
-        self.log = None
+    def __init__(self):
 
         # Report Merger
         self.file_1 = None
@@ -550,9 +549,15 @@ def usage():
 
 
 def report_manager(argv):
-    file = ""
-    mode = "+"
-    time = 5
+    report = ReportManager()
+    report_name = "Sample"
+    report_title = "Sample_Title"
+    pandas_profiling_export = "./test"
+    csv_path = "./test/test.csv"
+    plot_path = "./test"
+    report_path = "./test"
+    clean_csv_path = "./test"
+    mode = "pandas-profiling"
     # Parse args
     try:
         opts, args = getopt.getopt(argv, "hf:m:t:", ["help", "file=", "mode=", "time="])
@@ -567,12 +572,34 @@ def report_manager(argv):
             file = arg
         elif opt in ("-m", "--mode"):
             mode = arg
-            if str(mode) != "+" and str(mode) != "-":
+            if str(mode) != "pandas-profiling" and str(mode) != "custom" and str(mode) != "merge":
                 usage()
                 sys.exit(2)
         elif opt in ("-t", "--time"):
             time = arg
-    sync_time(subtitle_file=file, shift_time=time, shift_operator=mode)
+
+    if mode == "custom":
+        # Custom Report
+        print("Generating custom report")
+        report.set_csv_path(csv_path)
+        report.set_plot_path(plot_path)
+        report.set_report_path(report_path)
+        report.set_clean_csv_path(clean_csv_path)
+        report.run_analysis()
+    elif mode == "pandas-profiling":
+        # Pandas Profiling
+        print("Running Pandas Profiling")
+        report.set_file(csv_path)
+        report.load_dataframe()
+        report.set_report_title(report_title)
+        report.set_report_name(report_name)
+        sample_flag = None  # Set to the sample size if you would like to do it on a sample instead.
+        minimal_flag = False  # Quicker run if set to true, but not everything is captured.
+        report.create_report(sample_flag, minimal_flag)
+        report.set_save_directory(pandas_profiling_export)
+        report.export_report()
+    elif mode == "merge":
+        print("Implement Merging Reports")
 
 
 def main():
@@ -587,33 +614,3 @@ if __name__ == "__main__":
         usage()
         sys.exit(2)
     report_manager(sys.argv[1:])
-
-    # Create Object
-    test = ReportAnalyzer()
-
-    # Set Parameters like Report Name, and paths for export
-    report_name = "Sample"
-    report_title = "Sample_Title"
-    pandas_profiling_export = "./test"
-    csv_path = "./test/KHOU.csv"
-    plot_path = "./test"
-    report_path = "./test"
-    clean_csv_path = "./test"
-
-    # Custom Report
-    test.set_csv_path(csv_path)
-    test.set_plot_path(plot_path)
-    test.set_report_path(report_path)
-    test.set_clean_csv_path(clean_csv_path)
-    test.run_analysis()
-
-    # Pandas Profiling
-    test.set_file(csv_path)
-    test.load_dataframe()
-    test.set_report_title(report_name)
-    test.set_report_name(report_name)
-    sample_flag = None  # Set to the sample size if you would like to do it on a sample instead.
-    minimal_flag = False  # Quicker run if set to true, but not everything is captured.
-    test.create_report(sample_flag, minimal_flag)
-    test.set_save_directory(pandas_profiling_export)
-    test.export_report()

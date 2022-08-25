@@ -36,7 +36,7 @@ class ReportManager:
         self.df_2_join_keys = None
         self.join_type = "inner"
         self.report_name = "joined_report_export"
-        self.report_name_csv = str(report_name) + ".csv"
+        self.report_name_csv = str(self.report_name) + ".csv"
         self.report_name_xlsx = str(report_name) + ".xlsx"
         self.save_directory = os.getcwd()
         self.csv_export = save_directory + '\\' + report_name_csv

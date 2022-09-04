@@ -111,44 +111,59 @@ class ReportManager:
         print("New Directory: ", self.save_directory)
         self.export = self.save_directory + '\\' + self.report_name_html
 
-    # Load Files to Dataframe 1
-    def load_dataframe_1(self):
-        print("Loading Data to Dataframe 1")
-        try:
-            if self.file_1.endswith('.csv'):
-                print("File 1 is a CSV")
-                self.df_1 = pd.read_csv(self.file_1, engine='python')
-            elif self.file_1.endswith('.xlsx'):
-                print("File 1 is a Excel")
-                self.df_1 = pd.read_excel(self.file_1)
-            self.df_1.columns = self.df_1.columns.str.replace(' ', '_')
-            #self.df_1 = self.df_1.astype(str)
-            print("DTYPES Dataframe 1: ", self.df_1.dtypes)
-            #self.df_1.columns = self.df_1.columns.str.strip()
-            print(self.df_1)
-        except pd.errors.ParserError:
-            print("Error")
-            return 1
-
     # Load Files to Dataframe
-    def load_dataframe_2(self):
-        print("Loading Data to Dataframe 2")
-        try:
-            if self.file_2.endswith('.csv'):
-                print("File 2 is a CSV")
-                self.df_2 = pd.read_csv(self.file_2, engine='python')
-            elif self.file_2.endswith('.xlsx'):
-                print("File 2 is a Excel")
-                self.df_2 = pd.read_excel(self.file_2)
-            self.df_2.columns = self.df_2.columns.str.replace(' ', '_')
-            #self.df_2 = self.df_2.astype(str)
-            print("DTYPES Dataframe 2: ", self.df_2.dtypes)
-            #self.df_2.columns = self.df_2.columns.str.strip()
-            print(self.df_2)
-            return 0
-        except pd.errors.ParserError:
-            print("Error")
-            return 1
+    def load_dataframe(self, file_instance=0):
+        if file_instance == 1:
+            print("Loading Data to Dataframe 1")
+            try:
+                if self.file_1.endswith('.csv'):
+                    print("File 1 is a CSV")
+                    self.df_1 = pd.read_csv(self.file_1, engine='python')
+                elif self.file_1.endswith('.xlsx'):
+                    print("File 1 is a Excel")
+                    self.df_1 = pd.read_excel(self.file_1)
+                self.df_1.columns = self.df_1.columns.str.replace(' ', '_')
+                #self.df_1 = self.df_1.astype(str)
+                print("DTYPES Dataframe 1: ", self.df_1.dtypes)
+                #self.df_1.columns = self.df_1.columns.str.strip()
+                print(self.df_1)
+            except pd.errors.ParserError:
+                print("Error")
+                return 1
+        elif file_instance == 2:      
+            print("Loading Data to Dataframe 2")
+            try:
+                if self.file_2.endswith('.csv'):
+                    print("File 2 is a CSV")
+                    self.df_2 = pd.read_csv(self.file_2, engine='python')
+                elif self.file_2.endswith('.xlsx'):
+                    print("File 2 is a Excel")
+                    self.df_2 = pd.read_excel(self.file_2)
+                self.df_2.columns = self.df_2.columns.str.replace(' ', '_')
+                #self.df_2 = self.df_2.astype(str)
+                print("DTYPES Dataframe 2: ", self.df_2.dtypes)
+                #self.df_2.columns = self.df_2.columns.str.strip()
+                print(self.df_2)
+                return 0
+            except pd.errors.ParserError:
+                print("Error")
+                return 1
+        else:
+            print("Loading Data to Dataframe ")
+            try:
+                if self.file_raw.endswith('.csv'):
+                    print("File 1 is a CSV")
+                    self.df_raw = pd.read_csv(self.file_raw, dtype=str, engine='python')
+                elif self.file_raw.endswith('.xlsx'):
+                    print("File 1 is a Excel")
+                    self.df_raw = pd.read_excel(self.file_raw, dtype=str)
+                self.df_raw.columns = self.df_raw.columns.str.replace(' ', '_')
+                print(self.df_raw)
+            except pd.errors.ParserError:
+                print("Error")
+                return 1
+
+
 
     # Set Data Frame Column Type
     def set_columndtype(self, file, column, data_type):
@@ -375,22 +390,6 @@ class ReportManager:
     def get_report_title(self):
         return self.report_title
 
-    # Load Files to Dataframe
-    def load_dataframe(self):
-        print("Loading Data to Dataframe 1")
-        try:
-            if self.file_raw.endswith('.csv'):
-                print("File 1 is a CSV")
-                self.df_raw = pd.read_csv(self.file_raw, dtype=str, engine='python')
-            elif self.file_raw.endswith('.xlsx'):
-                print("File 1 is a Excel")
-                self.df_raw = pd.read_excel(self.file_raw, dtype=str)
-            self.df_raw.columns = self.df_raw.columns.str.replace(' ', '_')
-            print(self.df_raw)
-        except pd.errors.ParserError:
-            print("Error")
-            return 1
-
     def get_df(self):
         return self.df_raw
 
@@ -550,6 +549,9 @@ def report_manager(argv):
     report_path = "./test"
     clean_csv_path = "./test"
     mode = "pandas-profiling"
+    file_1 = "./test/test1.csv"
+    file_2 = "./test/test2.csv"
+    join_type = "inner"
     # Parse args
     try:
         opts, args = getopt.getopt(argv, "hf:m:t:", ["help", "file=", "mode=", "time="])
@@ -582,7 +584,7 @@ def report_manager(argv):
         # Pandas Profiling
         print("Running Pandas Profiling")
         report.set_file(csv_path)
-        report.load_dataframe()
+        report.load_dataframe(file_instance=0)
         report.set_report_title(report_title)
         report.set_report_name(report_name)
         sample_flag = None  # Set to the sample size if you would like to do it on a sample instead.
@@ -591,6 +593,12 @@ def report_manager(argv):
         report.set_save_directory(pandas_profiling_export)
         report.export_report()
     elif mode == "merge":
+        report.set_file_1(file_1)
+        report.set_file_2(file_2)
+        report.set_join_type(join_type=join_type)
+        report.load_dataframe(file_instance=1)
+        report.load_dataframe(file_instance=2)
+        report.join_data(df_1_join_keys=None, df_2_join_keys=None)
         print("Implement Merging Reports")
 
 

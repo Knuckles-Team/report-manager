@@ -25,8 +25,8 @@ import matplotlib.pyplot as plt
 
 
 class ReportManager:
+   
     def __init__(self):
-
         # Report Merger
         self.file_1 = None
         self.file_2 = None
@@ -37,10 +37,10 @@ class ReportManager:
         self.join_type = "inner"
         self.report_name = "joined_report_export"
         self.report_name_csv = str(self.report_name) + ".csv"
-        self.report_name_xlsx = str(report_name) + ".xlsx"
+        self.report_name_xlsx = str(self.report_name) + ".xlsx"
         self.save_directory = os.getcwd()
-        self.csv_export = save_directory + '\\' + report_name_csv
-        self.excel_export = save_directory + '\\' + report_name_xlsx
+        self.csv_export = self.save_directory + '\\' + self.report_name_csv
+        self.excel_export = self.save_directory + '\\' + self.report_name_xlsx
         self.df_final = None
 
         # Pandas Profiling
@@ -48,9 +48,9 @@ class ReportManager:
         self.df_raw = None
         self.report_name = "pandas-profiling_export"
         self.report_title = "Title"
-        self.report_name_html = str(report_name) + ".html"
+        self.report_name_html = str(self.report_name) + ".html"
         self.save_directory = os.getcwd()
-        self.export = save_directory + '\\' + report_name
+        self.export = self.save_directory + '\\' + self.report_name
         self.profile = None
 
         # Custom Report
@@ -87,8 +87,7 @@ class ReportManager:
             self.report_name = report_name
             self.csv_export = self.save_directory + '\\' + str(self.report_name)+".csv"
             self.excel_export = self.save_directory + '\\' + str(self.report_name)+".xlsx"
-            self.report_name = new_report_name
-            self.report_name_html = str(new_report_name) + ".html"
+            self.report_name_html = str(report_name) + ".html"
             self.export = self.save_directory + '\\' + str(self.report_name) + ".html"
         else:
             print("Report Name was Blank")
@@ -327,7 +326,7 @@ class ReportManager:
 
             print("Running Plots")
             # Running plot class from Graph package
-            self.plot.run(self.data, self.categorical_variable, self.numerical_variable, num_var_combination,
+            self.plot_run(self.data, self.categorical_variable, self.numerical_variable, num_var_combination,
                           cat_var_combination, catnum_combination, self.plot_path)
             return 0
         except Exception as e:
@@ -391,13 +390,6 @@ class ReportManager:
         except pd.errors.ParserError:
             print("Error")
             return 1
-
-    @staticmethod
-    def get_features(df):
-        concat_str = ""
-        for col in df.columns:
-            concat_str = concat_str + " " + str(col)
-        return concat_str
 
     def get_df(self):
         return self.df_raw

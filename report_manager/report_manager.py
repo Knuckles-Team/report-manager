@@ -22,7 +22,8 @@ import seaborn as sns
 import itertools
 from sklearn.preprocessing import LabelEncoder
 import matplotlib.pyplot as plt
-sns.set_context('paper', font_scale=1.4)
+sns.set(font_scale=.3)
+plt.xticks(rotation=45)
 
 class ReportManager:
    

@@ -22,7 +22,7 @@ import seaborn as sns
 import itertools
 from sklearn.preprocessing import LabelEncoder
 import matplotlib.pyplot as plt
-
+sns.set_context('paper', font_scale=1.4)
 
 class ReportManager:
    
@@ -110,7 +110,6 @@ class ReportManager:
                     print("File is a Excel")
                     self.df = pd.read_excel(self.files["file1"], dtype=str)
                 self.df.columns = self.df.columns.str.replace(' ', '_')
-                print(self.df)
             except pd.errors.ParserError:
                 print("Error")
                 return 1
@@ -127,7 +126,6 @@ class ReportManager:
                 #self.df_1 = self.df_1.astype(str)
                 print("DTYPES Dataframe 1: ", self.df_1.dtypes)
                 #self.df_1.columns = self.df_1.columns.str.strip()
-                print(self.df_1)
             except pd.errors.ParserError:
                 print("Error")
                 return 1
@@ -144,7 +142,6 @@ class ReportManager:
                 #self.df_2 = self.df_2.astype(str)
                 print("DTYPES Dataframe 2: ", self.df_2.dtypes)
                 #self.df_2.columns = self.df_2.columns.str.strip()
-                print(self.df_2)
                 return 0
             except pd.errors.ParserError:
                 print("Error")
@@ -159,21 +156,19 @@ class ReportManager:
                     print("File is a Excel")
                     self.df = pd.read_excel(self.files["file4"], dtype=str)
                 self.df.columns = self.df.columns.str.replace(' ', '_')
-                print(self.df)
             except pd.errors.ParserError:
                 print("Error")
                 return 1
         else:
-            print("Loading Data to Dataframe ")
+            print("Loading Data to Dataframe")
             try:
                 if self.files["file1"].endswith('.csv'):
-                    print("File 1 is a CSV")
+                    print("File Else is a CSV")
                     self.df = pd.read_csv(self.files["file1"], dtype=str, engine='python')
                 elif self.files["file1"].endswith('.xlsx'):
-                    print("File 1 is a Excel")
+                    print("File Else is a Excel")
                     self.df = pd.read_excel(self.files["file1"], dtype=str)
                 self.df.columns = self.df.columns.str.replace(' ', '_')
-                print(self.df)
             except pd.errors.ParserError:
                 print("Error")
                 return 1
@@ -487,8 +482,8 @@ class ReportManager:
             var1 = i[0][0]
             var2 = i[0][1]
             hue1 = i[1]
+            print(f'Generating Scatter Plot: {os.path.join(plot_save_path, f"{self.report_name} - {var1} vs {var2} by {hue1} Scatter Plot.png")}...')
             scatter_plot = sns.scatterplot(data=data, x=var1, y=var2, hue=hue1)
-            scatter_plot.figure(figsize=(3.841, 7.195), dpi=100)
             scatter_plot_figure = scatter_plot.get_figure()
             try:
                 scatter_plot_figure.savefig(os.path.join(plot_save_path, f"{self.report_name} - {var1} vs {var2} by {hue1} Scatter Plot.png"), dpi=2000)
@@ -496,9 +491,11 @@ class ReportManager:
                 print("[Scatter Plot Error]: ", e)
                 return e
             scatter_plot_figure.clf()
+            print(f'Scatter Plot: {os.path.join(plot_save_path, f"{self.report_name} - {var1} vs {var2} by {hue1} Scatter Plot.png")} Generated Successfully!')
 
         # Using countplot for categorical data
         for j in categorical_variable:
+            print(f'Generating Count Plot: {os.path.join(plot_save_path, f"{self.report_name} - {j} Count Plot.png")}...')
             count_plot = sns.countplot(data=data, x=j)
             count_plot_figure = count_plot.get_figure()
             try:
@@ -507,21 +504,22 @@ class ReportManager:
                 print("[Count Plot Error]: ", e)
                 return e
             count_plot_figure.clf()
+            print(f'Count Plot: {os.path.join(plot_save_path, f"{self.report_name} - {j} Count Plot.png")} Generated Successfully!')
 
         # Using boxplot for numerical + Categorical data
         for k in self.catnum_combination:
             num1 = k[0]
             cat1 = k[1]
+            print(f'Generating Box Plot: {os.path.join(plot_save_path, f"{self.report_name} - {num1}_{cat1} Box Plot.png")}...')
             box_plot = sns.boxplot(data=data, x=cat1, y=num1)
             box_plot_figure = box_plot.get_figure()
-            box_plot_figure.figure(figsize=(3.841, 7.195), dpi=100)
             try:
-                box_plot_figure.savefig(os.path.join(plot_save_path, f"{self.report_name} - {num1}_{cat1} Bar Plot.png"), dpi=2000)
+                box_plot_figure.savefig(os.path.join(plot_save_path, f"{self.report_name} - {num1}_{cat1} Box Plot.png"), dpi=2000)
             except Exception as e:
                 print("[Box Plot Error]: ", e)
                 return e
-
             box_plot_figure.clf()
+            print(f'Box Plot: {os.path.join(plot_save_path, f"{self.report_name} - {num1}_{cat1} Box Plot.png")} Generated Successfully!')
 
         # Creating heatmap to show correlation
         le = LabelEncoder()
@@ -529,6 +527,7 @@ class ReportManager:
             data[cat] = le.fit_transform(data[cat])
         plt.figure(figsize=(15, 10))
         corr_matrix = data.corr()
+        print(f'Generating Heat Map: {os.path.join(plot_save_path, f"{self.report_name} - Heat Plot.png")}...')
         heat_map = sns.heatmap(corr_matrix, annot=True)
         heat_map_figure = heat_map.get_figure()
         try:
@@ -537,6 +536,7 @@ class ReportManager:
             print("[Heat Map Error]: ", e)
             return e
         heat_map_figure.clf()
+        print(f'Heat Map: {os.path.join(plot_save_path, f"{self.report_name} - Heat Plot.png")} Generated Successfully!')
 
     def export_data(self, csv_flag, report_name=None):
         if report_name == None:
@@ -557,17 +557,27 @@ class ReportManager:
 
 
 def usage():
-    print(f"Flags: \n"
-          f"-h | --help             [ See usage ]\n"
-          f"-f | --files            [ File(s) to be read (Comma separated, not spaces) ]\n"
-          f"-n | --name             [ Name of report ]\n"
-          f"-t | --type             [ Save as the following formats: <CSV/csv/XLSX/xlsx> ]\n"
-          f"-m | --merge            [ Merge two datasets: <inner/outer/left/right/append> ]\n"
-          f"-p | --pandas-profiling [ Generate a pandas profiling report ]\n"
-          f"-r | --report           [ Generate a custom report with plots ]\n"
-          f"Usage: \n"
-          f'report-manager report_manager.py --files "/home/Users/Fred/usa_weather.csv" --name "USA Weather" --type "XLSX" --save-directory "/home/Users/Fred/Downloads" --report --pandas-profiling/n'
-          f'report-manager report_manager.py --files "/home/Users/Fred/usa_weather.csv,/home/Users/Fred/mexico_weather.csv" --name "North America Weather" --type "CSV" --save-directory "/home/Users/Fred/Downloads" --merge/n')
+    print(f"Flags: \n\n"
+          f"\t-h | --help             \t[ See usage ]\n"
+          f"\t-f | --files            \t[ File(s) to be read (Comma separated, no spaces) ]\n"
+          f"\t-j | --join-keys        \t[ Join key(s) for merge (Comma separated, no spaces) ]\n"
+          f"\t-n | --name             \t[ Name of report ]\n"
+          f"\t-t | --type             \t[ Save as the following formats: <CSV/csv/XLSX/xlsx> ]\n"
+          f"\t-m | --merge            \t[ Merge two datasets: <inner/outer/left/right/append> ]\n"
+          f"\t-p | --pandas-profiling \t[ Generate a pandas profiling report ]\n"
+          f"\t-r | --report           \t[ Generate a custom report with plots ]\n\n"
+          f"Usage: \n\n"
+          f'report-manager --pandas-profiling --report\n\t'
+          f'--files "/home/Users/Fred/usa_weather.csv" \n\t'
+          f'--name "USA Weather" \n\t'
+          f'--type "XLSX" \n\t'
+          f'--save-directory "/home/Users/Fred/Downloads"\n\n'
+          f'report-manager --merge "append"\n\t'
+          f'--files "/home/Users/Fred/usa_weather.csv,/home/Users/Fred/mexico_weather.csv" \n\t'
+          f'--name "North America Weather" \n\t'
+          f'--type "csv" \n\t'
+          f'--save-directory "/home/Users/Fred/Downloads" \n\t'
+          f'--join-keys "column1,column2,column3"\n')
 
 
 def report_manager(argv):
@@ -581,8 +591,9 @@ def report_manager(argv):
     report_flag = False
     merge_flag = False
     join_type = "inner"
+    join_keys = ""
     try:
-        opts, args = getopt.getopt(argv, "hrmpf:s:t:", ["help", "report", "merge=", "pandas-profiling", "files=", "save-directory=", "name=", "type="])
+        opts, args = getopt.getopt(argv, "hrmpf:j:s:t:", ["help", "report", "merge=", "pandas-profiling", "files=", "--join-keys", "save-directory=", "name=", "type="])
     except getopt.GetoptError:
         usage()
         sys.exit(2)
@@ -594,6 +605,8 @@ def report_manager(argv):
             files = arg.split(",")
         elif opt in ("-r", "--report"):
             report_flag = True
+        elif opt in ("j", "--join-keys"):
+            join_keys = arg
         elif opt in ("-m", "--merge"):
             merge_flag = True
             if arg.lower() == "inner":
@@ -662,7 +675,7 @@ def report_manager(argv):
         report.set_join_type(join_type=join_type)
         report.load_dataframe(file_instance=2)
         report.load_dataframe(file_instance=3)
-        report.join_data(df_1_join_keys=None, df_2_join_keys=None)
+        report.join_data(df_1_join_keys=join_keys, df_2_join_keys=join_keys)
         report.export_data(csv_flag=type_flag, report_name=f"{report_name} - Merged")
         print(f"{join_type.capitalize()} Complete!")
 

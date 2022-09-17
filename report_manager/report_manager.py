@@ -90,12 +90,13 @@ class ReportManager:
         return self.report_name
 
     def set_save_directory(self, directory):
-        self.save_directory = directory
+        self.save_directory = os.path.join(f"{directory}", f"{self.report_name} - Analysis")
+        if not os.path.isdir(self.save_directory):
+            os.mkdir(self.save_directory)
         self.html_export = os.path.join(self.save_directory, f"{self.report_name} - Pandas Profiling.html")
-        self.set_plot_path(directory)
-        self.set_report_path(directory)
+        self.set_plot_path(self.save_directory)
+        self.set_report_path(self.save_directory)
         print("Save Directory: ",  self.save_directory)
-
 
     # Load Files to Dataframe
     def load_dataframe(self, file_instance=1):
@@ -176,7 +177,6 @@ class ReportManager:
             except pd.errors.ParserError:
                 print("Error")
                 return 1
-
 
 
     # Set Data Frame Column Type
@@ -272,90 +272,86 @@ class ReportManager:
         self.report_path = new_report_path
 
     def run_analysis(self):
+        # Assigning csv file to a variable call 'data'
+        print("Assigning csv file to a variable call 'data'")
+        self.data = self.df.copy()
+
+        # Create a function to separate out numerical and categorical data
+        # Using this function to ensure that all non-numerical in a numerical column
+        # and non-categorical in a categorical column is annotated
+
+        print("Assigning Categorical and Numerical Variables")
+        self.categorical_variable = self.cat_variable(self.data)
+        self.numerical_variable = self.num_variable(self.data)
+        print("Assigning Categorical and Numerical Variables Completed")
+
+        # Assigning variable filename to report and enable writing mode
+        print(f'Opening Report: {os.path.join(self.save_directory, f"{self.report_name} - Analysis.txt")}')
+        report = open(os.path.join(self.save_directory, f"{self.report_name} - Analysis.txt"), "w")
+        print("Opening Report Complete")
+
+        # Execute overview function in model module
+        self.data = self.model_overview(self.data, self.numerical_variable, report)
+
+        # Create a function to decide whether to drop all NA values or replace them
+        # Drop it if NAN count < 5 %
+        self.nan_prop = (self.data.isna().mean().round(2) * 100)  # Show % of NaN values per column
+
+        cols_to_drop = self.drop_na()
+
+        print("Dropped NA Values")
+        self.data = self.data.dropna(subset=cols_to_drop)
+
+        # Using Imputer to fill NaN values
+        # Counting the proportion of NaN
+        cols_to_fill = self.fill_na()
+
+        cat_var_tofill = []
+        num_var_tofill = []
+
+        for var in cols_to_fill:
+            if var in self.categorical_variable:
+                cat_var_tofill.append(var)
+            else:
+                num_var_tofill.append(var)
+
+        print("Categorical Values")
+        imp_cat = SimpleImputer(missing_values=np.nan, strategy='most_frequent')
         try:
-            # Assigning csv file to a variable call 'data'
-            print("Assigning csv file to a variable call 'data'")
-            self.data = self.df.copy()
+            self.data[cat_var_tofill] = imp_cat.fit_transform(self.data[cat_var_tofill])
+        except ValueError:
+            pass
 
-            # Create a function to separate out numerical and categorical data
-            # Using this function to ensure that all non-numerical in a numerical column
-            # and non-categorical in a categorical column is annotated
+        print("Number Values")
+        imp_num = SimpleImputer(missing_values=np.nan, strategy='median')
+        try:
+            self.data[num_var_tofill] = imp_num.fit_transform(self.data[num_var_tofill])
+        except ValueError:
+            pass
 
-            print("Assigning Categorical and Numerical Variables")
-            self.categorical_variable = self.cat_variable(self.data)
-            self.numerical_variable = self.num_variable(self.data)
-            print("Assigning Categorical and Numerical Variables Completed")
+        self.data = self.outlier()
 
-            # Assigning variable filename to report and enable writing mode
-            print(f'Opening Report: {os.path.join(self.report_path, self.report_name + ".txt")}')
-            report = open(os.path.join(self.report_path, self.report_name + ".txt"), "w")
-            print("Opening Report Complete")
+        # Creating possible combinations among a list of numerical variables
+        num_var_combination = list(itertools.combinations(self.numerical_variable, 2))
 
-            # Execute overview function in model module
-            self.data = self.model_overview(self.data, self.numerical_variable, report)
+        # Creating possible combinations among a list of categorical variables
+        cat_var_combination = list(itertools.combinations(self.categorical_variable, 2))
 
-            # Create a function to decide whether to drop all NA values or replace them
-            # Drop it if NAN count < 5 %
-            self.nan_prop = (self.data.isna().mean().round(2) * 100)  # Show % of NaN values per column
+        # Creating possible combinations among a list of numerical and categorical variuable
+        catnum_combination = list(itertools.product(self.numerical_variable, self.categorical_variable))
 
-            cols_to_drop = self.drop_na()
+        print("Running Model...")
+        # Running the report now
+        self.model_run(num_var_combination, catnum_combination, cat_var_combination, report, self.data)
+        print("Running Model Complete!")
 
-            print("Dropped NA Values")
-            self.data = self.data.dropna(subset=cols_to_drop)
-
-            # Using Imputer to fill NaN values
-            # Counting the proportion of NaN
-            cols_to_fill = self.fill_na()
-
-            cat_var_tofill = []
-            num_var_tofill = []
-
-            for var in cols_to_fill:
-                if var in self.categorical_variable:
-                    cat_var_tofill.append(var)
-                else:
-                    num_var_tofill.append(var)
-
-            print("Categorical Values")
-            imp_cat = SimpleImputer(missing_values=np.nan, strategy='most_frequent')
-            try:
-                self.data[cat_var_tofill] = imp_cat.fit_transform(self.data[cat_var_tofill])
-            except ValueError:
-                pass
-
-            print("Number Values")
-            imp_num = SimpleImputer(missing_values=np.nan, strategy='median')
-            try:
-                self.data[num_var_tofill] = imp_num.fit_transform(self.data[num_var_tofill])
-            except ValueError:
-                pass
-
-            self.data = self.outlier()
-
-            # Creating possible combinations among a list of numerical variables
-            num_var_combination = list(itertools.combinations(self.numerical_variable, 2))
-
-            # Creating possible combinations among a list of categorical variables
-            cat_var_combination = list(itertools.combinations(self.categorical_variable, 2))
-
-            # Creating possible combinations among a list of numerical and categorical variuable
-            catnum_combination = list(itertools.product(self.numerical_variable, self.categorical_variable))
-
-            print("Running Model...")
-            # Running the report now
-            self.model_run(num_var_combination, catnum_combination, cat_var_combination, report, self.data)
-            print("Running Model Complete!")
-
-            self.df_final = self.data
-            print("Generating Plots...")
-            # Running plot class from Graph package
-            self.plot_run(self.data, self.categorical_variable, self.numerical_variable, num_var_combination,
-                          cat_var_combination, catnum_combination, self.plot_path)
-            print("Plots Generated Successfully!")
-            return 0
-        except Exception as e:
-            print("[ERROR]: ", e)
-            return e
+        self.df_final = self.data
+        print("Generating Plots...")
+        # Running plot class from Graph package
+        self.plot_run(self.data, self.categorical_variable, self.numerical_variable, num_var_combination,
+                      cat_var_combination, catnum_combination, self.plot_path)
+        print("Plots Generated Successfully!")
+        return 0
 
     @staticmethod
     def cat_variable(df):
@@ -491,26 +487,41 @@ class ReportManager:
             var1 = i[0][0]
             var2 = i[0][1]
             hue1 = i[1]
-            plot1 = sns.scatterplot(data=data, x=var1, y=var2, hue=hue1)
-            fig1 = plot1.get_figure()
-            fig1.savefig(os.path.join(plot_save_path, f"{self.report_name} - {var1} vs {var2} by {hue1} Scatter Plot.png"))
-            fig1.clf()
+            scatter_plot = sns.scatterplot(data=data, x=var1, y=var2, hue=hue1)
+            scatter_plot.figure(figsize=(3.841, 7.195), dpi=100)
+            scatter_plot_figure = scatter_plot.get_figure()
+            try:
+                scatter_plot_figure.savefig(os.path.join(plot_save_path, f"{self.report_name} - {var1} vs {var2} by {hue1} Scatter Plot.png"), dpi=2000)
+            except Exception as e:
+                print("[Scatter Plot Error]: ", e)
+                return e
+            scatter_plot_figure.clf()
 
         # Using countplot for categorical data
         for j in categorical_variable:
-            plot2 = sns.countplot(data=data, x=j)
-            fig2 = plot2.get_figure()
-            fig2.savefig(os.path.join(plot_save_path, f"{self.report_name} - {j} Count Plot.png"))
-            fig2.clf()
+            count_plot = sns.countplot(data=data, x=j)
+            count_plot_figure = count_plot.get_figure()
+            try:
+                count_plot_figure.savefig(os.path.join(plot_save_path, f"{self.report_name} - {j} Count Plot.png"), dpi=2000)
+            except Exception as e:
+                print("[Count Plot Error]: ", e)
+                return e
+            count_plot_figure.clf()
 
         # Using boxplot for numerical + Categorical data
         for k in self.catnum_combination:
             num1 = k[0]
             cat1 = k[1]
-            plot3 = sns.boxplot(data=data, x=cat1, y=num1)
-            fig3 = plot3.get_figure()
-            fig3.savefig(os.path.join(plot_save_path, f"{self.report_name} - {num1}_{cat1} Bar Plot.png"))
-            fig3.clf()
+            box_plot = sns.boxplot(data=data, x=cat1, y=num1)
+            box_plot_figure = box_plot.get_figure()
+            box_plot_figure.figure(figsize=(3.841, 7.195), dpi=100)
+            try:
+                box_plot_figure.savefig(os.path.join(plot_save_path, f"{self.report_name} - {num1}_{cat1} Bar Plot.png"), dpi=2000)
+            except Exception as e:
+                print("[Box Plot Error]: ", e)
+                return e
+
+            box_plot_figure.clf()
 
         # Creating heatmap to show correlation
         le = LabelEncoder()
@@ -518,20 +529,26 @@ class ReportManager:
             data[cat] = le.fit_transform(data[cat])
         plt.figure(figsize=(15, 10))
         corr_matrix = data.corr()
-        plot4 = sns.heatmap(corr_matrix, annot=True)
-        fig4 = plot4.get_figure()
-        fig4.savefig(os.path.join(plot_save_path, f"{self.report_name} - Heat Plot.png"))
-        fig4.clf()
+        heat_map = sns.heatmap(corr_matrix, annot=True)
+        heat_map_figure = heat_map.get_figure()
+        try:
+            heat_map_figure.savefig(os.path.join(plot_save_path, f"{self.report_name} - Heat Plot.png"), dpi=2000)
+        except Exception as e:
+            print("[Heat Map Error]: ", e)
+            return e
+        heat_map_figure.clf()
 
-    def export_data(self, csv_flag):
+    def export_data(self, csv_flag, report_name=None):
+        if report_name == None:
+            report_name = self.report_name
         if csv_flag == 1:
-            print(f"Exporting Report: {os.path.join(self.save_directory, f'{self.report_name}.csv')}")
-            self.df_final.to_csv(os.path.join(self.save_directory, f"{self.report_name}.csv"), index=False)
+            print(f"Exporting Report: {os.path.join(self.save_directory, f'{report_name}.csv')}")
+            self.df_final.to_csv(os.path.join(self.save_directory, f"{report_name}.csv"), index=False)
             print("Exported to CSV File Complete!")
         else:
             # Export large data by creating xlsxwriter first and setting archivezip64 option
-            print(f"Exporting Report: {os.path.join(self.save_directory, f'{self.report_name}.xlsx')}")
-            self.df_final.to_excel(os.path.join(self.save_directory, f"{self.report_name}.xlsx"), index=False, engine='xlsxwriter')
+            print(f"Exporting Report: {os.path.join(self.save_directory, f'{report_name}.xlsx')}")
+            self.df_final.to_excel(os.path.join(self.save_directory, f"{report_name}.xlsx"), index=False, engine='xlsxwriter')
             print("Exported to Excel File Complete!")
 
     def export_pandas_profiling(self):
@@ -615,6 +632,9 @@ def report_manager(argv):
             print(f"Cannot read file: {file}")
             usage()
             sys.exit(2)
+
+    report.set_report_title(report_title)
+    report.set_report_name(report_name)
     report.set_save_directory(save_directory)
 
     # Custom Report
@@ -622,17 +642,14 @@ def report_manager(argv):
         print("Generating custom report")
         report.set_files(files[0], "file4")
         report.load_dataframe(file_instance=4)
-        report.set_report_name(report_name)
         report.run_analysis()
-        report.export_data(csv_flag=type_flag)
+        report.export_data(csv_flag=type_flag, report_name=f"{report_name} - Dataset")
         print("Custom Report Generated Successfully!")
     # Pandas Profiling
     if pandas_profiling_flag:
         print("Running Pandas Profiling")
         report.set_files(files[0], "file1")
         report.load_dataframe(file_instance=1)
-        report.set_report_title(report_title)
-        report.set_report_name(report_name)
         sample_flag = None  # Set to the sample size if you would like to do it on a sample instead.
         minimal_flag = False  # Quicker run if set to true, but not everything is captured.
         report.create_pandas_profiling_report(sample_flag, minimal_flag)
@@ -646,7 +663,7 @@ def report_manager(argv):
         report.load_dataframe(file_instance=2)
         report.load_dataframe(file_instance=3)
         report.join_data(df_1_join_keys=None, df_2_join_keys=None)
-        report.export_data(csv_flag=type_flag)
+        report.export_data(csv_flag=type_flag, report_name=f"{report_name} - Merged")
         print(f"{join_type.capitalize()} Complete!")
 
 

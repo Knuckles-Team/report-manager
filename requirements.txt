@@ -4,3 +4,4 @@ matplotlib
 pandas_profiling
 scipy
 numpy
+xlsxwriter

@@ -27,37 +27,34 @@ import matplotlib.pyplot as plt
 class ReportManager:
    
     def __init__(self):
+        self.files = {
+            "file1": "None",
+            "file2": "None",
+            "file3": "None",
+            "file4": "None"
+        }
+
+        self.report_name = "Sample Name"
+        self.report_title = "Sample Title"
+
         # Report Merger
-        self.file_1 = None
-        self.file_2 = None
         self.df_1 = None
         self.df_2 = None
         self.df_1_join_keys = None
         self.df_2_join_keys = None
         self.join_type = "inner"
-        self.report_name = "joined_report_export"
-        self.report_name_csv = str(self.report_name) + ".csv"
-        self.report_name_xlsx = str(self.report_name) + ".xlsx"
         self.save_directory = os.getcwd()
-        self.csv_export = self.save_directory + '\\' + self.report_name_csv
-        self.excel_export = self.save_directory + '\\' + self.report_name_xlsx
         self.df_final = None
 
         # Pandas Profiling
-        self.file_raw = None
-        self.df_raw = None
-        self.report_name = "pandas-profiling_export"
-        self.report_title = "Title"
-        self.report_name_html = str(self.report_name) + ".html"
+        self.df = None
         self.save_directory = os.getcwd()
-        self.export = self.save_directory + '\\' + self.report_name
+        self.html_export = os.path.join(self.save_directory, f"{self.report_name} - Pandas Profiling.html")
         self.profile = None
 
         # Custom Report
-        self.csv_path = os.getcwd()
         self.plot_path = os.getcwd()
         self.report_path = os.getcwd()
-        self.clean_csv_path = os.getcwd()
         self.data = None
         self.nan_prop = None
         self.categorical_variable = None
@@ -68,10 +65,10 @@ class ReportManager:
         self.cat_var_combination = None
         self.catnum_combination = None
 
-    def set_file_1(self, file_1):
+    def set_files_1(self, file_1):
         self.file_1 = file_1
 
-    def set_file_2(self, file_2):
+    def set_files_2(self, file_2):
         self.file_2 = file_2
 
     def set_join_type(self, join_type):
@@ -85,10 +82,7 @@ class ReportManager:
         if report_name != "":
             print("Report Name: ", report_name)
             self.report_name = report_name
-            self.csv_export = self.save_directory + '\\' + str(self.report_name)+".csv"
-            self.excel_export = self.save_directory + '\\' + str(self.report_name)+".xlsx"
-            self.report_name_html = str(report_name) + ".html"
-            self.export = self.save_directory + '\\' + str(self.report_name) + ".html"
+            self.html_export = os.path.join(self.save_directory, f"{self.report_name} - Pandas Profiling.html")
         else:
             print("Report Name was Blank")
 
@@ -97,31 +91,37 @@ class ReportManager:
 
     def set_save_directory(self, directory):
         self.save_directory = directory
-        print("New Directory: ",  self.save_directory)
-        self.csv_export = self.save_directory + '\\' + self.report_name_csv
-        self.excel_export = self.save_directory + '\\' + self.report_name_xlsx
-        self.set_pandas_save_directory(directory)
-        self.set_csv_path(directory)
+        self.html_export = os.path.join(self.save_directory, f"{self.report_name} - Pandas Profiling.html")
         self.set_plot_path(directory)
         self.set_report_path(directory)
-        self.set_clean_csv_path(directory)
+        print("Save Directory: ",  self.save_directory)
 
-    def set_pandas_save_directory(self, save_path):
-        self.save_directory = save_path
-        print("New Directory: ", self.save_directory)
-        self.export = self.save_directory + '\\' + self.report_name_html
 
     # Load Files to Dataframe
-    def load_dataframe(self, file_instance=0):
+    def load_dataframe(self, file_instance=1):
         if file_instance == 1:
+            print("Loading Data to Dataframe")
+            try:
+                if self.files["file1"].endswith('.csv'):
+                    print("File is a CSV")
+                    self.df = pd.read_csv(self.files["file1"], dtype=str, engine='python')
+                elif self.files["file1"].endswith('.xlsx'):
+                    print("File is a Excel")
+                    self.df = pd.read_excel(self.files["file1"], dtype=str)
+                self.df.columns = self.df.columns.str.replace(' ', '_')
+                print(self.df)
+            except pd.errors.ParserError:
+                print("Error")
+                return 1
+        if file_instance == 2:
             print("Loading Data to Dataframe 1")
             try:
-                if self.file_1.endswith('.csv'):
+                if self.files["file2"].endswith('.csv'):
                     print("File 1 is a CSV")
-                    self.df_1 = pd.read_csv(self.file_1, engine='python')
-                elif self.file_1.endswith('.xlsx'):
+                    self.df_1 = pd.read_csv(self.files["file2"], engine='python')
+                elif self.files["file2"].endswith('.xlsx'):
                     print("File 1 is a Excel")
-                    self.df_1 = pd.read_excel(self.file_1)
+                    self.df_1 = pd.read_excel(self.files["file2"])
                 self.df_1.columns = self.df_1.columns.str.replace(' ', '_')
                 #self.df_1 = self.df_1.astype(str)
                 print("DTYPES Dataframe 1: ", self.df_1.dtypes)
@@ -130,15 +130,15 @@ class ReportManager:
             except pd.errors.ParserError:
                 print("Error")
                 return 1
-        elif file_instance == 2:      
+        elif file_instance == 3:
             print("Loading Data to Dataframe 2")
             try:
-                if self.file_2.endswith('.csv'):
+                if self.files["file3"].endswith('.csv'):
                     print("File 2 is a CSV")
-                    self.df_2 = pd.read_csv(self.file_2, engine='python')
-                elif self.file_2.endswith('.xlsx'):
+                    self.df_2 = pd.read_csv(self.files["file3"], engine='python')
+                elif self.files["file3"].endswith('.xlsx'):
                     print("File 2 is a Excel")
-                    self.df_2 = pd.read_excel(self.file_2)
+                    self.df_2 = pd.read_excel(self.files["file3"])
                 self.df_2.columns = self.df_2.columns.str.replace(' ', '_')
                 #self.df_2 = self.df_2.astype(str)
                 print("DTYPES Dataframe 2: ", self.df_2.dtypes)
@@ -148,17 +148,31 @@ class ReportManager:
             except pd.errors.ParserError:
                 print("Error")
                 return 1
+        elif file_instance == 4:
+            print("Loading Data to Dataframe")
+            try:
+                if self.files["file4"].endswith('.csv'):
+                    print("File is a CSV")
+                    self.df = pd.read_csv(self.files["file4"], dtype=str, engine='python')
+                elif self.files["file4"].endswith('.xlsx'):
+                    print("File is a Excel")
+                    self.df = pd.read_excel(self.files["file4"], dtype=str)
+                self.df.columns = self.df.columns.str.replace(' ', '_')
+                print(self.df)
+            except pd.errors.ParserError:
+                print("Error")
+                return 1
         else:
             print("Loading Data to Dataframe ")
             try:
-                if self.file_raw.endswith('.csv'):
+                if self.files["file1"].endswith('.csv'):
                     print("File 1 is a CSV")
-                    self.df_raw = pd.read_csv(self.file_raw, dtype=str, engine='python')
-                elif self.file_raw.endswith('.xlsx'):
+                    self.df = pd.read_csv(self.files["file1"], dtype=str, engine='python')
+                elif self.files["file1"].endswith('.xlsx'):
                     print("File 1 is a Excel")
-                    self.df_raw = pd.read_excel(self.file_raw, dtype=str)
-                self.df_raw.columns = self.df_raw.columns.str.replace(' ', '_')
-                print(self.df_raw)
+                    self.df = pd.read_excel(self.files["file1"], dtype=str)
+                self.df.columns = self.df.columns.str.replace(' ', '_')
+                print(self.df)
             except pd.errors.ParserError:
                 print("Error")
                 return 1
@@ -219,7 +233,12 @@ class ReportManager:
     def get_df2_join_keys(self):
         return self.df_2_join_keys
 
-    # Join Based off Condition
+    # Join Based off several conditions:
+    #   - Append
+    #   - Left Join
+    #   - Right Join
+    #   - Inner Join
+    #   - Outer Join
     def join_data(self, df_1_join_keys=None, df_2_join_keys=None):
         # You can use this function by calling it with your join keys already set. Otherwise you can manaully set them using the setters.
         if df_1_join_keys and df_2_join_keys:
@@ -246,27 +265,17 @@ class ReportManager:
                 print("Error: ", e)
         print(self.df_final)
 
-    def set_csv_path(self, new_csv_path):
-        self.csv_path = new_csv_path
-
     def set_plot_path(self, new_plot_path):
         self.plot_path = new_plot_path
 
     def set_report_path(self, new_report_path):
         self.report_path = new_report_path
 
-    def set_clean_csv_path(self, new_clean_csv_path):
-        self.clean_csv_path = new_clean_csv_path
-
     def run_analysis(self):
         try:
-            # Creating a txt file in the report_path
-            print("Creating txt file in the report_path")
-            filename = os.path.join(self.report_path, "report" + ".txt")
-
             # Assigning csv file to a variable call 'data'
             print("Assigning csv file to a variable call 'data'")
-            self.data = self.df_raw.copy()
+            self.data = self.df.copy()
 
             # Create a function to separate out numerical and categorical data
             # Using this function to ensure that all non-numerical in a numerical column
@@ -278,8 +287,8 @@ class ReportManager:
             print("Assigning Categorical and Numerical Variables Completed")
 
             # Assigning variable filename to report and enable writing mode
-            print("Opening Report")
-            report = open(filename, "w")
+            print(f'Opening Report: {os.path.join(self.report_path, self.report_name + ".txt")}')
+            report = open(os.path.join(self.report_path, self.report_name + ".txt"), "w")
             print("Opening Report Complete")
 
             # Execute overview function in model module
@@ -332,17 +341,17 @@ class ReportManager:
             # Creating possible combinations among a list of numerical and categorical variuable
             catnum_combination = list(itertools.product(self.numerical_variable, self.categorical_variable))
 
-            print("Running Model")
+            print("Running Model...")
             # Running the report now
             self.model_run(num_var_combination, catnum_combination, cat_var_combination, report, self.data)
-            # Create an output file that shows cleaned data
-            data2 = self.data.copy()
-            data2.to_csv(r'{}/cleaned_csv.csv'.format(self.clean_csv_path), index=False)
+            print("Running Model Complete!")
 
-            print("Running Plots")
+            self.df_final = self.data
+            print("Generating Plots...")
             # Running plot class from Graph package
             self.plot_run(self.data, self.categorical_variable, self.numerical_variable, num_var_combination,
                           cat_var_combination, catnum_combination, self.plot_path)
+            print("Plots Generated Successfully!")
             return 0
         except Exception as e:
             print("[ERROR]: ", e)
@@ -369,20 +378,20 @@ class ReportManager:
         return [i for i, v in self.nan_prop.items() if v > 5]
 
     # Pandas Profiling Create Report
-    def create_report(self, sample=None, minimal=False):
+    def create_pandas_profiling_report(self, sample=None, minimal=False):
         # Create Profile Report off of dataframe
-        self.df_raw.replace(['None', 'Null'], np.nan)
-        self.df_raw.isnull().sum(axis=0).to_frame().rename(columns={0: 'Count_Nulls'})
+        self.df.replace(['None', 'Null'], np.nan)
+        self.df.isnull().sum(axis=0).to_frame().rename(columns={0: 'Count_Nulls'})
         if sample is None:
-            self.profile = pp.ProfileReport(self.df_raw, title=self.report_title, minimal=minimal,
+            self.profile = pp.ProfileReport(self.df, title=self.report_title, minimal=minimal,
                                             html={'style': {'full_width': True}}, progress_bar=True)
         else:
-            self.profile = pp.ProfileReport(self.df_raw.sample(n=sample), title=self.report_title, minimal=minimal,
+            self.profile = pp.ProfileReport(self.df.sample(n=sample), title=self.report_title, minimal=minimal,
                                             html={'style': {'full_width': True}}, progress_bar=True)
 
     # Pandas Profiling Set File
-    def set_file(self, file_raw):
-        self.file_raw = file_raw
+    def set_files(self, file, file_index="file1"):
+        self.files[file_index] = file
 
     def set_report_title(self, new_report_title):
         self.report_title = new_report_title
@@ -391,11 +400,7 @@ class ReportManager:
         return self.report_title
 
     def get_df(self):
-        return self.df_raw
-
-    def export_report(self):
-        print("Exporting Data")
-        self.profile.to_file(output_file=self.export)
+        return self.df
 
     def model_overview(self, df, numerical_variable, report):
         data_head = df.head()
@@ -488,14 +493,14 @@ class ReportManager:
             hue1 = i[1]
             plot1 = sns.scatterplot(data=data, x=var1, y=var2, hue=hue1)
             fig1 = plot1.get_figure()
-            fig1.savefig(plot_save_path + "/{} vs {} by {} scatterplot.png".format(var1, var2, hue1))
+            fig1.savefig(os.path.join(plot_save_path, f"{self.report_name} - {var1} vs {var2} by {hue1} Scatter Plot.png"))
             fig1.clf()
 
         # Using countplot for categorical data
         for j in categorical_variable:
             plot2 = sns.countplot(data=data, x=j)
             fig2 = plot2.get_figure()
-            fig2.savefig(plot_save_path + "/{}_countplot.png".format(j))
+            fig2.savefig(os.path.join(plot_save_path, f"{self.report_name} - {j} Count Plot.png"))
             fig2.clf()
 
         # Using boxplot for numerical + Categorical data
@@ -504,7 +509,7 @@ class ReportManager:
             cat1 = k[1]
             plot3 = sns.boxplot(data=data, x=cat1, y=num1)
             fig3 = plot3.get_figure()
-            fig3.savefig(plot_save_path + "/{}_{}_barplot.png".format(num1, cat1))
+            fig3.savefig(os.path.join(plot_save_path, f"{self.report_name} - {num1}_{cat1} Bar Plot.png"))
             fig3.clf()
 
         # Creating heatmap to show correlation
@@ -515,46 +520,52 @@ class ReportManager:
         corr_matrix = data.corr()
         plot4 = sns.heatmap(corr_matrix, annot=True)
         fig4 = plot4.get_figure()
-        fig4.savefig(plot_save_path + "/heatplot.png")
+        fig4.savefig(os.path.join(plot_save_path, f"{self.report_name} - Heat Plot.png"))
         fig4.clf()
 
     def export_data(self, csv_flag):
-        print("Exporting Data")
         if csv_flag == 1:
-            self.df_final.to_csv(self.csv_export, index=False)
-            print("Exported to CSV Complete!")
+            print(f"Exporting Report: {os.path.join(self.save_directory, f'{self.report_name}.csv')}")
+            self.df_final.to_csv(os.path.join(self.save_directory, f"{self.report_name}.csv"), index=False)
+            print("Exported to CSV File Complete!")
         else:
             # Export large data by creating xlsxwriter first and setting archivezip64 option
-            self.df_final.to_excel(self.excel_export, index=False, engine='xlsxwriter')
-            print("Exported to Excel Complete!")
+            print(f"Exporting Report: {os.path.join(self.save_directory, f'{self.report_name}.xlsx')}")
+            self.df_final.to_excel(os.path.join(self.save_directory, f"{self.report_name}.xlsx"), index=False, engine='xlsxwriter')
+            print("Exported to Excel File Complete!")
+
+    def export_pandas_profiling(self):
+        print(f"Exporting Pandas Profiling Report: {self.html_export}")
+        self.profile.to_file(output_file=self.html_export)
 
 
 def usage():
-    print(f"Usage: \n"
-          f"-h | --help [ See usage for script ]\n"
-          f"-f | --file [ Subtitle File ]\n"
-          f"-m | --mode [ \"+\"/\"-\" ]\n"
-          f"-t | --time [ Time in seconds to shift ]\n"
-          f"\n"
-          f"report-manager --file Engrish.srt --mode + --time 5\n")
+    print(f"Flags: \n"
+          f"-h | --help             [ See usage ]\n"
+          f"-f | --files            [ File(s) to be read (Comma separated, not spaces) ]\n"
+          f"-n | --name             [ Name of report ]\n"
+          f"-t | --type             [ Save as the following formats: <CSV/csv/XLSX/xlsx> ]\n"
+          f"-m | --merge            [ Merge two datasets: <inner/outer/left/right/append> ]\n"
+          f"-p | --pandas-profiling [ Generate a pandas profiling report ]\n"
+          f"-r | --report           [ Generate a custom report with plots ]\n"
+          f"Usage: \n"
+          f'report-manager report_manager.py --files "/home/Users/Fred/usa_weather.csv" --name "USA Weather" --type "XLSX" --save-directory "/home/Users/Fred/Downloads" --report --pandas-profiling/n'
+          f'report-manager report_manager.py --files "/home/Users/Fred/usa_weather.csv,/home/Users/Fred/mexico_weather.csv" --name "North America Weather" --type "CSV" --save-directory "/home/Users/Fred/Downloads" --merge/n')
 
 
 def report_manager(argv):
     report = ReportManager()
     report_name = "Sample"
     report_title = "Sample_Title"
-    pandas_profiling_export = "./test"
-    csv_path = "./test/test.csv"
-    plot_path = "./test"
-    report_path = "./test"
-    clean_csv_path = "./test"
-    mode = "pandas-profiling"
-    file_1 = "./test/test1.csv"
-    file_2 = "./test/test2.csv"
+    save_directory = os.getcwd()
+    files = f"{os.getcwd()}/test1.csv,{os.getcwd()}/test2.csv"
+    type_flag = True
+    pandas_profiling_flag = False
+    report_flag = False
+    merge_flag = False
     join_type = "inner"
-    # Parse args
     try:
-        opts, args = getopt.getopt(argv, "hf:m:t:", ["help", "file=", "mode=", "time="])
+        opts, args = getopt.getopt(argv, "hrmpf:s:t:", ["help", "report", "merge=", "pandas-profiling", "files=", "save-directory=", "name=", "type="])
     except getopt.GetoptError:
         usage()
         sys.exit(2)
@@ -562,44 +573,81 @@ def report_manager(argv):
         if opt in ("-h", "--help"):
             usage()
             sys.exit()
-        elif opt in ("-f", "--file"):
-            file = arg
-        elif opt in ("-m", "--mode"):
-            mode = arg
-            if str(mode) != "pandas-profiling" and str(mode) != "custom" and str(mode) != "merge":
+        elif opt in ("-f", "--files"):
+            files = arg.split(",")
+        elif opt in ("-r", "--report"):
+            report_flag = True
+        elif opt in ("-m", "--merge"):
+            merge_flag = True
+            if arg.lower() == "inner":
+                join_type = arg
+            elif arg.lower() == "outer":
+                join_type = arg
+            elif arg.lower() == "left":
+                join_type = arg
+            elif arg.lower() == "right":
+                join_type = arg
+            elif arg.lower() == "append":
+                join_type = arg
+            else:
+                print("Join type not recognized, please select from: inner, outer, left, right, append")
                 usage()
                 sys.exit(2)
-        elif opt in ("-t", "--time"):
-            time = arg
+        elif opt in ("-p", "--pandas-profiling"):
+            pandas_profiling_flag = True
+        elif opt in ("s", "--save-directory"):
+            save_directory = arg
+            if not os.path.isdir(save_directory):
+                print(f"Save directory is not valid: {save_directory}")
+                usage()
+                sys.exit(2)
+        elif opt in ("n", "--name"):
+            report_title = arg
+            report_name = arg
+        elif opt in ("t", "--type"):
+            if arg == "CSV" or arg == "csv":
+                type_flag = True
+            elif arg == "XLSX" or arg == "xlsx":
+                type_flag = False
 
-    if mode == "custom":
-        # Custom Report
+    for file in files:
+        if not os.path.isfile(file):
+            print(f"Cannot read file: {file}")
+            usage()
+            sys.exit(2)
+    report.set_save_directory(save_directory)
+
+    # Custom Report
+    if report_flag:
         print("Generating custom report")
-        report.set_csv_path(csv_path)
-        report.set_plot_path(plot_path)
-        report.set_report_path(report_path)
-        report.set_clean_csv_path(clean_csv_path)
+        report.set_files(files[0], "file4")
+        report.load_dataframe(file_instance=4)
+        report.set_report_name(report_name)
         report.run_analysis()
-    elif mode == "pandas-profiling":
-        # Pandas Profiling
+        report.export_data(csv_flag=type_flag)
+        print("Custom Report Generated Successfully!")
+    # Pandas Profiling
+    if pandas_profiling_flag:
         print("Running Pandas Profiling")
-        report.set_file(csv_path)
-        report.load_dataframe(file_instance=0)
+        report.set_files(files[0], "file1")
+        report.load_dataframe(file_instance=1)
         report.set_report_title(report_title)
         report.set_report_name(report_name)
         sample_flag = None  # Set to the sample size if you would like to do it on a sample instead.
         minimal_flag = False  # Quicker run if set to true, but not everything is captured.
-        report.create_report(sample_flag, minimal_flag)
-        report.set_save_directory(pandas_profiling_export)
-        report.export_report()
-    elif mode == "merge":
-        report.set_file_1(file_1)
-        report.set_file_2(file_2)
+        report.create_pandas_profiling_report(sample_flag, minimal_flag)
+        report.export_pandas_profiling()
+        print("Pandas Profiling Report Generated Successfully!")
+    # Dataset Merging
+    if merge_flag:
+        report.set_files(files[0], "file2")
+        report.set_files(files[1], "file3")
         report.set_join_type(join_type=join_type)
-        report.load_dataframe(file_instance=1)
         report.load_dataframe(file_instance=2)
+        report.load_dataframe(file_instance=3)
         report.join_data(df_1_join_keys=None, df_2_join_keys=None)
-        print("Implement Merging Reports")
+        report.export_data(csv_flag=type_flag)
+        print(f"{join_type.capitalize()} Complete!")
 
 
 def main():

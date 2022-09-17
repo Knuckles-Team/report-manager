@@ -9,9 +9,9 @@ Manage your reports
 | Short Flag | Long Flag | Description                                         |
 |------------| ------|-----------------------------------------------------|
 | -h         | --help | See Usage                                           |
-| -f         | --files | File(s) to be read (Comma separated, no spaces)     |
+| -f         | --files | File(s) to be read (Comma separated)     |
 | -n         | --name | Name of report                                      |
-| -j         | --join-keys  | File(s) to be read (Comma separated, no spaces)     |
+| -j         | --join-keys  | File(s) to be read (Pipe Separated for files, Comma separated for each column)     |
 | -t         | --type | Save as the following formats: <CSV/csv/XLSX/xlsx>  |
 | -m         | --merge | Merge two datasets: <inner/outer/left/right/append> |
 | -p         | --pandas-profiling | Generate a pandas profiling report                  |

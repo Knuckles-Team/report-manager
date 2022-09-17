@@ -560,8 +560,8 @@ class ReportManager:
 def usage():
     print(f"Flags: \n\n"
           f"\t-h | --help             \t[ See usage ]\n"
-          f"\t-f | --files            \t[ File(s) to be read (Comma separated, no spaces) ]\n"
-          f"\t-j | --join-keys        \t[ Join key(s) for merge (Comma separated, no spaces) ]\n"
+          f"\t-f | --files            \t[ File(s) to be read (Comma separated) ]\n"
+          f"\t-j | --join-keys        \t[ Join key(s) for merge (Pipe Separated for files, Comma separated for each column) ]\n"
           f"\t-n | --name             \t[ Name of report ]\n"
           f"\t-t | --type             \t[ Save as the following formats: <CSV/csv/XLSX/xlsx> ]\n"
           f"\t-m | --merge            \t[ Merge two datasets: <inner/outer/left/right/append> ]\n"
@@ -578,7 +578,7 @@ def usage():
           f'--name "North America Weather" \n\t'
           f'--type "csv" \n\t'
           f'--save-directory "/home/Users/Fred/Downloads" \n\t'
-          f'--join-keys "column1,column2,column3"\n')
+          f'--join-keys "column1, column5, column6 | Column3, Column6, Column9"\n')
 
 
 def report_manager(argv):
@@ -603,10 +603,11 @@ def report_manager(argv):
             usage()
             sys.exit()
         elif opt in ("-f", "--files"):
-            files = arg.split(",")
+            files = arg.replace(" ", "")
+            files = files.split(",")
         elif opt in ("-r", "--report"):
             report_flag = True
-        elif opt in ("j", "--join-keys"):
+        elif opt in ("-j", "--join-keys"):
             join_keys = arg
         elif opt in ("-m", "--merge"):
             merge_flag = True
@@ -626,16 +627,16 @@ def report_manager(argv):
                 sys.exit(2)
         elif opt in ("-p", "--pandas-profiling"):
             pandas_profiling_flag = True
-        elif opt in ("s", "--save-directory"):
+        elif opt in ("-s", "--save-directory"):
             save_directory = arg
             if not os.path.isdir(save_directory):
                 print(f"Save directory is not valid: {save_directory}")
                 usage()
                 sys.exit(2)
-        elif opt in ("n", "--name"):
+        elif opt in ("-n", "--name"):
             report_title = arg
             report_name = arg
-        elif opt in ("t", "--type"):
+        elif opt in ("-t", "--type"):
             if arg == "CSV" or arg == "csv":
                 type_flag = True
             elif arg == "XLSX" or arg == "xlsx":
@@ -673,10 +674,16 @@ def report_manager(argv):
     if merge_flag:
         report.set_files(files[0], "file2")
         report.set_files(files[1], "file3")
+        join_keys = join_keys.replace(" ", "")
+        join_keys = join_keys.split("|")
+        df_1_join_keys = join_keys[0].split(",")
+        df_2_join_keys = join_keys[1].split(",")
+        report.set_df1_join_keys(df_1_join_keys=df_1_join_keys)
+        report.set_df2_join_keys(df_2_join_keys=df_2_join_keys)
         report.set_join_type(join_type=join_type)
         report.load_dataframe(file_instance=2)
         report.load_dataframe(file_instance=3)
-        report.join_data(df_1_join_keys=join_keys, df_2_join_keys=join_keys)
+        report.join_data()
         report.export_data(csv_flag=type_flag, report_name=f"{report_name} - Merged")
         print(f"{join_type.capitalize()} Complete!")
 

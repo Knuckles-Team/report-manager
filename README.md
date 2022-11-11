@@ -39,6 +39,12 @@ report-manager --merge "append"
           --join-keys "column1,column2,column3"
 ```
 
+#### Install Instructions
+Install Python Package
+
+```bash
+python -m pip install report-manager
+```
 
 #### Build Instructions
 Build Python Package

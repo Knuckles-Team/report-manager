@@ -1,5 +1,5 @@
 # Report Manager
-*Version: 0.2.1*
+*Version: 0.3.0*
 
 Manage your reports
 - Merge reports based off specified columns

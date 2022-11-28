@@ -27,7 +27,7 @@ setup(
     license='Unlicense',
     packages=['report_manager'],
     include_package_data=True,
-    install_requires=['scikit-learn', 'pandas', 'matplotlib', 'pandas_profiling', 'scipy', 'numpy'],
+    install_requires=['scikit-learn', 'pandas', 'matplotlib', 'pandas_profiling', 'scipy', 'numpy', 'xlsxwriter'],
     py_modules=['report_manager'],
     package_data={'report_manager': ['report_manager']},
     classifiers=[

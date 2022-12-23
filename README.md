@@ -4,6 +4,7 @@
 Manage your reports
 - Merge reports based off specified columns
 - Generate analysis on data set
+- Pandas profiling
 
 ### Usage:
 | Short Flag | Long Flag | Description                                         |

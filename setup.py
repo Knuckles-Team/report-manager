@@ -4,13 +4,15 @@
 from setuptools import setup
 from report_manager.version import __version__, __author__
 from pathlib import Path
+import os
 import re
-
+from pip._internal.network.session import PipSession
+from pip._internal.req import parse_requirements
 
 readme = Path('README.md').read_text()
 version = __version__
+requirements = parse_requirements(os.path.join(os.path.dirname(__file__), 'requirements.txt'), session=PipSession())
 readme = re.sub(r"Version: [0-9]*\.[0-9]*\.[0-9][0-9]*", f"Version: {version}", readme)
-print(f"README: {readme}")
 with open("README.md", "w") as readme_file:
     readme_file.write(readme)
 description = 'Manage your reports'
@@ -27,8 +29,7 @@ setup(
     license='Unlicense',
     packages=['report_manager'],
     include_package_data=True,
-    install_requires=['scikit-learn>=1.2.0', 'pandas>=1.5.2', 'matplotlib>=3.6.2', 'pandas_profiling>=3.6.0',
-                      'scipy>=1.9.3', 'numpy>=1.23.5', 'xlsxwriter>=3.0.3', 'tabulate>=0.9.0', 'ipywidgets>=8.0.4'],
+    install_requires=[str(requirement.requirement) for requirement in requirements],
     py_modules=['report_manager'],
     package_data={'report_manager': ['report_manager']},
     classifiers=[

@@ -17,7 +17,7 @@ from scipy.stats import chi2_contingency
 import statsmodels.api as sm
 from statsmodels.formula.api import ols
 import pandas as pd
-import pandas_profiling as pp
+import ydata_profiling as pp
 import seaborn as sns
 import itertools
 from sklearn.preprocessing import LabelEncoder

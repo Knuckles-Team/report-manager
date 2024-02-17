@@ -83,7 +83,7 @@ python -m pip install report-manager
 
 ## Geniusbot Application
 
-Use Rom Manager tool with a GUI through Geniusbot
+Use with a GUI through Geniusbot
 
 Visit our [GitHub](https://github.com/Knuckles-Team/geniusbot) for more information
 

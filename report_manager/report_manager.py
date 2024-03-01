@@ -2,10 +2,6 @@
 # -*- coding: utf-8 -*-
 
 import getopt
-import warnings
-import pandas as pd
-import logging
-import time
 import os
 import os.path
 import sys
@@ -22,11 +18,13 @@ import seaborn as sns
 import itertools
 from sklearn.preprocessing import LabelEncoder
 import matplotlib.pyplot as plt
+
 sns.set(font_scale=.3)
 plt.xticks(rotation=45)
 
+
 class ReportManager:
-   
+
     def __init__(self):
         self.files = {
             "file1": "None",
@@ -97,7 +95,7 @@ class ReportManager:
         self.html_export = os.path.join(self.save_directory, f"{self.report_name} - Pandas Profiling.html")
         self.set_plot_path(self.save_directory)
         self.set_report_path(self.save_directory)
-        print("Save Directory: ",  self.save_directory)
+        print("Save Directory: ", self.save_directory)
 
     # Load Files to Dataframe
     def load_dataframe(self, file_instance=1):
@@ -124,9 +122,9 @@ class ReportManager:
                     print("File 1 is a Excel")
                     self.df_1 = pd.read_excel(self.files["file2"])
                 self.df_1.columns = self.df_1.columns.str.replace(' ', '_')
-                #self.df_1 = self.df_1.astype(str)
+                # self.df_1 = self.df_1.astype(str)
                 print("DTYPES Dataframe 1: ", self.df_1.dtypes)
-                #self.df_1.columns = self.df_1.columns.str.strip()
+                # self.df_1.columns = self.df_1.columns.str.strip()
             except pd.errors.ParserError:
                 print("Error")
                 return 1
@@ -140,9 +138,9 @@ class ReportManager:
                     print("File 2 is a Excel")
                     self.df_2 = pd.read_excel(self.files["file3"])
                 self.df_2.columns = self.df_2.columns.str.replace(' ', '_')
-                #self.df_2 = self.df_2.astype(str)
+                # self.df_2 = self.df_2.astype(str)
                 print("DTYPES Dataframe 2: ", self.df_2.dtypes)
-                #self.df_2.columns = self.df_2.columns.str.strip()
+                # self.df_2.columns = self.df_2.columns.str.strip()
                 return 0
             except pd.errors.ParserError:
                 print("Error")
@@ -173,7 +171,6 @@ class ReportManager:
             except pd.errors.ParserError:
                 print("Error")
                 return 1
-
 
     # Set Data Frame Column Type
     def set_columndtype(self, file, column, data_type):
@@ -245,7 +242,7 @@ class ReportManager:
                 print("DataFrame 1 Before Append: ", self.df_1)
                 self.df_final = self.df_1.append(self.df_2)
                 print("DataFrame 1 After Append: ", self.df_1)
-                #self.df_final = self.df_1.copy()
+                # self.df_final = self.df_1.copy()
                 print(self.df_final)
             else:
                 print("Files Have Different Column Lengths")
@@ -254,7 +251,8 @@ class ReportManager:
             print("Joining data")
             try:
                 if len(self.df_1_join_keys) > 0 and len(self.df_2_join_keys) > 0:
-                    self.df_final = pd.merge(self.df_1, self.df_2, left_on=self.df_1_join_keys, right_on=self.df_2_join_keys, how=self.join_type)
+                    self.df_final = pd.merge(self.df_1, self.df_2, left_on=self.df_1_join_keys,
+                                             right_on=self.df_2_join_keys, how=self.join_type)
                 else:
                     print("One of your keys was empty")
             except Exception as e:
@@ -483,44 +481,54 @@ class ReportManager:
             var1 = i[0][0]
             var2 = i[0][1]
             hue1 = i[1]
-            print(f'Generating Scatter Plot: {os.path.join(plot_save_path, f"{self.report_name} - {var1} vs {var2} by {hue1} Scatter Plot.png")}...')
+            print(
+                f'Generating Scatter Plot: {os.path.join(plot_save_path, f"{self.report_name} - {var1} vs {var2} by {hue1} Scatter Plot.png")}...')
             scatter_plot = sns.scatterplot(data=data, x=var1, y=var2, hue=hue1)
             scatter_plot_figure = scatter_plot.get_figure()
             try:
-                scatter_plot_figure.savefig(os.path.join(plot_save_path, f"{self.report_name} - {var1} vs {var2} by {hue1} Scatter Plot.png"), dpi=2000)
+                scatter_plot_figure.savefig(
+                    os.path.join(plot_save_path, f"{self.report_name} - {var1} vs {var2} by {hue1} Scatter Plot.png"),
+                    dpi=2000)
             except Exception as e:
                 print("[Scatter Plot Error]: ", e)
                 return e
             scatter_plot_figure.clf()
-            print(f'Scatter Plot: {os.path.join(plot_save_path, f"{self.report_name} - {var1} vs {var2} by {hue1} Scatter Plot.png")} Generated Successfully!')
+            print(
+                f'Scatter Plot: {os.path.join(plot_save_path, f"{self.report_name} - {var1} vs {var2} by {hue1} Scatter Plot.png")} Generated Successfully!')
 
         # Using countplot for categorical data
         for j in categorical_variable:
-            print(f'Generating Count Plot: {os.path.join(plot_save_path, f"{self.report_name} - {j} Count Plot.png")}...')
+            print(
+                f'Generating Count Plot: {os.path.join(plot_save_path, f"{self.report_name} - {j} Count Plot.png")}...')
             count_plot = sns.countplot(data=data, x=j)
             count_plot_figure = count_plot.get_figure()
             try:
-                count_plot_figure.savefig(os.path.join(plot_save_path, f"{self.report_name} - {j} Count Plot.png"), dpi=2000)
+                count_plot_figure.savefig(os.path.join(plot_save_path, f"{self.report_name} - {j} Count Plot.png"),
+                                          dpi=2000)
             except Exception as e:
                 print("[Count Plot Error]: ", e)
                 return e
             count_plot_figure.clf()
-            print(f'Count Plot: {os.path.join(plot_save_path, f"{self.report_name} - {j} Count Plot.png")} Generated Successfully!')
+            print(
+                f'Count Plot: {os.path.join(plot_save_path, f"{self.report_name} - {j} Count Plot.png")} Generated Successfully!')
 
         # Using boxplot for numerical + Categorical data
         for k in self.catnum_combination:
             num1 = k[0]
             cat1 = k[1]
-            print(f'Generating Box Plot: {os.path.join(plot_save_path, f"{self.report_name} - {num1}_{cat1} Box Plot.png")}...')
+            print(
+                f'Generating Box Plot: {os.path.join(plot_save_path, f"{self.report_name} - {num1}_{cat1} Box Plot.png")}...')
             box_plot = sns.boxplot(data=data, x=cat1, y=num1)
             box_plot_figure = box_plot.get_figure()
             try:
-                box_plot_figure.savefig(os.path.join(plot_save_path, f"{self.report_name} - {num1}_{cat1} Box Plot.png"), dpi=2000)
+                box_plot_figure.savefig(
+                    os.path.join(plot_save_path, f"{self.report_name} - {num1}_{cat1} Box Plot.png"), dpi=2000)
             except Exception as e:
                 print("[Box Plot Error]: ", e)
                 return e
             box_plot_figure.clf()
-            print(f'Box Plot: {os.path.join(plot_save_path, f"{self.report_name} - {num1}_{cat1} Box Plot.png")} Generated Successfully!')
+            print(
+                f'Box Plot: {os.path.join(plot_save_path, f"{self.report_name} - {num1}_{cat1} Box Plot.png")} Generated Successfully!')
 
         # Creating heatmap to show correlation
         le = LabelEncoder()
@@ -537,7 +545,8 @@ class ReportManager:
             print("[Heat Map Error]: ", e)
             return e
         heat_map_figure.clf()
-        print(f'Heat Map: {os.path.join(plot_save_path, f"{self.report_name} - Heat Plot.png")} Generated Successfully!')
+        print(
+            f'Heat Map: {os.path.join(plot_save_path, f"{self.report_name} - Heat Plot.png")} Generated Successfully!')
 
     def export_data(self, csv_flag, report_name=None):
         if report_name == None:
@@ -549,7 +558,8 @@ class ReportManager:
         else:
             # Export large data by creating xlsxwriter first and setting archivezip64 option
             print(f"Exporting Report: {os.path.join(self.save_directory, f'{report_name}.xlsx')}")
-            self.df_final.to_excel(os.path.join(self.save_directory, f"{report_name}.xlsx"), index=False, engine='xlsxwriter')
+            self.df_final.to_excel(os.path.join(self.save_directory, f"{report_name}.xlsx"), index=False,
+                                   engine='xlsxwriter')
             print("Exported to Excel File Complete!")
 
     def export_pandas_profiling(self):
@@ -594,7 +604,9 @@ def report_manager(argv):
     join_type = "inner"
     join_keys = ""
     try:
-        opts, args = getopt.getopt(argv, "hrmpf:j:s:t:", ["help", "report", "merge=", "pandas-profiling", "files=", "--join-keys", "save-directory=", "name=", "type="])
+        opts, args = getopt.getopt(argv, "hrmpf:j:s:t:",
+                                   ["help", "report", "merge=", "pandas-profiling", "files=", "--join-keys",
+                                    "save-directory=", "name=", "type="])
     except getopt.GetoptError:
         usage()
         sys.exit(2)
